@@ -1,0 +1,30 @@
+#pragma kernel CSMain
+
+struct Vertex
+{
+    float3 position;
+    float3 normal;
+    float2 uv;
+};
+
+struct Input
+{
+    float3 position;
+    float3 direction;
+};
+
+RWStructuredBuffer<Vertex> _Vertices;
+StructuredBuffer<Input> _Inputs;
+
+[numthreads(256,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    const float3 vertex_position = _Vertices[id.x].position;
+    const Input input_ = _Inputs[id.y];
+
+    const float input_distance = distance(vertex_position, input_.position);
+
+    _Vertices[id.x].position = 
+        vertex_position + 
+        input_.direction * smoothstep(length(input_.direction), 0, input_distance);
+}
